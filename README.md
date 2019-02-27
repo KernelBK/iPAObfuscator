@@ -9,6 +9,15 @@ https://github.com/godshield/iOSObfuscator
 # 注意事项
   目前只支持单架构的arm64的macho文件，还不支持fat file
 
+# 联系我们
+  有任何疑问都可以联系我们
+
+  邮箱:shendun@god-shield.com
+
+  QQ:2667069150
+  
+  QQ用户交流①群:786457705
+
 # 加固对比
 * 2.使用的混淆参数如下:
     -mllvm -bcf -mllvm -bcf_loop=3 -mllvm -bcf_prob=40 -mllvm-fla -mllvm -split -mllvm -split_num=2
