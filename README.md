@@ -1,7 +1,7 @@
 # iPAObfuscator
 to Obfuscate iPA which contain bitcode， 是一款针对二进制的加固工具，底层使用的clang是ollvm编译的。
 
-# useage
+# usage
 python main.py  bctest -o bctest_new
 
 关于详细功能说明请阅读另外一个项目:
@@ -17,6 +17,8 @@ https://github.com/godshield/iOSObfuscator
   QQ:2667069150
   
   QQ用户交流①群:786457705
+
+# 自助免费服务请访问 [神盾科技官网](http://www.god-shield.com)
 
 # 加固对比
 * 2.使用的混淆参数如下:
