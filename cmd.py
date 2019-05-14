@@ -3,96 +3,111 @@
 
 import os
 import subprocess
+import datetime
+import sys
 
+class Cmd(object):
 
-
-
-class Xar:
-
-    def __init__(self,cmd,workDir = os.getcwd()):
-        self._Xar = [workDir + "/bin/xar"]
+    def __init__(self,cmd,workDir):
         self.cmd = cmd
         self.workDir = workDir
         self.stdout = None
         self.returncode = 0
-        self._Xar.extend(cmd)
-    def run(self):
+    def __repr__(self):
+        cmd_string = u" ".join(u'"{}"'.format(c if isinstance(c, unicode) else unicode(c, 'utf-8')) for c in self.cmd)
+        if self.stdout is None:
+            return u"{}\n".format(cmd_string)
+        else:
+            return u"{}\n{}Exited with {}\n".format(cmd_string,
+                                                                    unicode(self.stdout, 'utf-8'),
+                                                                    self.returncode)
+    def runCmd(self):
         try:
-            out = subprocess.check_output(self._Xar, stderr=subprocess.STDOUT, cwd=self.workDir)
+            out = subprocess.check_output(self.cmd,stderr=subprocess.STDOUT,cwd=self.workDir)
         except subprocess.CalledProcessError as err:
-            pass
+            self.returncode = err.returncode
+            self.stdout = err.output
         else:
             self.returncode = 0
             self.stdout = out
+class CopyFile(Cmd):
+
+    """File Copy"""
+    def __init__(self, src, dst, working_dir=os.getcwd()):
+        super(CopyFile, self).__init__(["/usr/bin/ditto", src, dst], working_dir)
+
+
+class Lipo(Cmd):
+
+    def __init__(self,input,output="",workDir = os.getcwd()):
+        self._lipo = [workDir + "/bin/lipo"]
+        self._lipo.extend(input)
+        self._lipo.extend(output)
+        super(Lipo,self).__init__(self._lipo,workDir)
+    def run(self):
+        self.runCmd()
         return self
 
-class Segedit:
+class LipoCreate(Lipo):
 
-    def __init__(self, input, output, workDir = os.getcwd()):
+    def __init__(self, inputs, output, working_dir=os.getcwd()):
+        super(LipoCreate, self).__init__(["-create"] + inputs , ["-output", output],working_dir)
+    def run(self):
+        self.runCmd()
+        return self
+
+class Xar(Cmd):
+
+    def __init__(self,cmd,workDir = os.getcwd()):
+        self._Xar = [workDir + "/bin/xar"]
+        self._Xar.extend(cmd)
+        super(Xar,self).__init__(self._Xar,workDir)
+    def run(self):
+        self.runCmd()
+        return self
+
+class Segedit(Cmd):
+
+    def __init__(self,input,output,workDir = os.getcwd()):
         self._Segedit = [workDir + "/bin/Segedit"]
-        self.workDir = workDir
-        self.stdout = None
-        self.returncode = 0
         self._Segedit.extend(input)
         self._Segedit.extend(output)
+        super(Segedit,self).__init__(self._Segedit,workDir)
     def run(self):
-        try:
-            out = subprocess.check_output(self._Segedit, stderr=subprocess.STDOUT, cwd=self.workDir)
-        except subprocess.CalledProcessError as err:
-            pass
-        else:
-            self.returncode = 0
-            self.stdout = out
+        self.runCmd()
         return self
 
-class Clang:
+class Clang(Cmd):
 
-    def __init__(self, input, output, workDir = os.getcwd()):
+    def __init__(self,input ,output ,workDir = os.getcwd()):
         self._clang = [workDir + "/bin/clang" ]
         self._clang.extend(["-cc1"])
-        self.workDir = workDir
-        self.stdout = None
-        self.returncode = 0
         self.input = input
         self.output = output
         self.inputtype = "ir"
-    def addArgs(self, args):
-        self._clang.extend(args)
+        super(Clang, self).__init__(self._clang, workDir)
+    def addArgs(self,args):
+        self.cmd.extend(args)
     def run(self):
-        self._clang.extend(["-x", self.inputtype])
+        self.cmd.extend(["-x", self.inputtype])
         self._clang.extend(self.input)
         self._clang.extend(["-o"])
         self._clang.extend(self.output)
-        try:
-            out = subprocess.check_output(self._clang, stderr=subprocess.STDOUT, cwd=self.workDir)
-        except subprocess.CalledProcessError as err:
-            pass
-        else:
-            self.returncode = 0
-            self.stdout = out
+        self.runCmd()
         return self
 
 
-class Ld:
+class Ld(Cmd):
 
-    def __init__(self, output, workDir = os.getcwd()):
+    def __init__(self,output = "a.out",workDir = os.getcwd()):
         self._Ld = [workDir + "/bin/ld"]
-        self.workDir = workDir
-        self.stdout = None
-        self.returncode = 0
         self.output = output
-
+        super(Ld,self).__init__(self._Ld,workDir)
 
     def addArgs(self, args):
-        self._Ld.extend(args)
+        self.cmd.extend(args)
 
     def run(self):
-        self._Ld.extend(["-o", self.output])
-        try:
-            out = subprocess.check_output(self._Ld, stderr=subprocess.STDOUT, cwd=self.workDir)
-        except subprocess.CalledProcessError as err:
-            pass
-        else:
-            self.returncode = 0
-            self.stdout = out
+        self.cmd.extend(["-o", self.output])
+        self.runCmd()
         return self
