@@ -2,7 +2,7 @@
 to Obfuscate iPA which contain bitcode， 是一款针对二进制的加固工具，底层使用的clang是ollvm编译的。
 
 # usage
-python main.py  bctest -o bctest_new
+python main.py  bctest.ipa --taskId 0011  -o  bctest/
 
 
 
